@@ -29,12 +29,29 @@
 		5E9C38AE304D965D0024E133 /* StudyPlannerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StudyPlannerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		5E9C3899304D965C0024E133 /* StudyPlanner */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = StudyPlanner;
-			sourceTree = "<group>";
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5E9C38E4304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlanner" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				ContentView.swift,
+				Domain/Assignment.swift,
+				StudyPlannerApp.swift,
+			);
+			target = 5E9C3896304D965C0024E133 /* StudyPlanner */;
 		};
+		5E9C38E5304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlannerTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				ContentView.swift,
+				StudyPlannerApp.swift,
+			);
+			target = 5E9C38A3304D965D0024E133 /* StudyPlannerTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
 		5E9C38A7304D965D0024E133 /* StudyPlannerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = StudyPlannerTests;
@@ -43,6 +60,15 @@
 		5E9C38B1304D965D0024E133 /* StudyPlannerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = StudyPlannerUITests;
+			sourceTree = "<group>";
+		};
+		5E9C38E0304D992B0024E133 /* StudyPlanner */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5E9C38E4304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlanner" target */,
+				5E9C38E5304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlannerTests" target */,
+			);
+			path = StudyPlanner;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,7 +101,7 @@
 		5E9C388E304D965C0024E133 = {
 			isa = PBXGroup;
 			children = (
-				5E9C3899304D965C0024E133 /* StudyPlanner */,
+				5E9C38E0304D992B0024E133 /* StudyPlanner */,
 				5E9C38A7304D965D0024E133 /* StudyPlannerTests */,
 				5E9C38B1304D965D0024E133 /* StudyPlannerUITests */,
 				5E9C3898304D965C0024E133 /* Products */,
@@ -107,9 +133,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				5E9C3899304D965C0024E133 /* StudyPlanner */,
-			);
 			name = StudyPlanner;
 			packageProductDependencies = (
 			);
@@ -132,6 +155,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				5E9C38A7304D965D0024E133 /* StudyPlannerTests */,
+				5E9C38E0304D992B0024E133 /* StudyPlanner */,
 			);
 			name = StudyPlannerTests;
 			packageProductDependencies = (
