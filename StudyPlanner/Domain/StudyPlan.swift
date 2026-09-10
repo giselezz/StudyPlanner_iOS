@@ -10,12 +10,15 @@ import Foundation
 struct StudySession: Codable, Identifiable {
     var id = UUID()
     var taskTitle: String
-    var startsAt: Date
-    var durationMinutes: Int
+    var startsAt: Date? = nil
+    var durationMinutes: Int? = nil
     var isCompleted = false
     
-    var endsAt: Date {
-        startsAt.addingTimeInterval(TimeInterval(durationMinutes * 60))
+    var endsAt: Date? {
+        guard let start = startsAt, let minutes = durationMinutes else {
+            return nil
+        }
+        return start.addingTimeInterval(Double(minutes * 60))
     }
 }
 

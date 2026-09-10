@@ -38,6 +38,7 @@
 				Domain/Assignment.swift,
 				Domain/StudyPlan.swift,
 				StudyPlannerApp.swift,
+				UseCases/StudyPlanUseCases.swift,
 			);
 			target = 5E9C3896304D965C0024E133 /* StudyPlanner */;
 		};
