@@ -41,6 +41,7 @@
 				UseCases/StudyPlanUseCases.swift,
 				ViewModels/StudyPlannerViewModel.swift,
 				Views/NewAssignmentView.swift,
+				Views/StudyPlanReviewView.swift,
 			);
 			target = 5E9C3896304D965C0024E133 /* StudyPlanner */;
 		};

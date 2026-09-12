@@ -13,6 +13,8 @@ struct NewAssignmentView: View {
     @State private var title = ""
     @State private var type: AssignmentType = .essay
     @State private var dueDate: Date = Date().addingTimeInterval(86400)
+    @State private var showReview = false
+    @State private var estimatedWorkloadHours = 8
     @FocusState private var isTitleFocused: Bool
     
     
@@ -46,6 +48,18 @@ struct NewAssignmentView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
+                    Stepper(
+                        "Total Study Time: \(estimatedWorkloadHours) hours",
+                        value: $estimatedWorkloadHours,
+                        in: 1...100
+                    )
+                    
+                    Text("We'll divide this time between the suggested tasks. You can adjust each duration during review.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
+                VStack(alignment: .leading, spacing: 8) {
                     DatePicker(
                         "Due Date",
                         selection: $dueDate,
@@ -74,7 +88,9 @@ struct NewAssignmentView: View {
                 Button {
                     isTitleFocused = false
                     
-                    viewModel.generatePlan(title: title, type: type, dueDate: dueDate)
+                    viewModel.generatePlan(title: title, type: type, dueDate: dueDate, estimatedWorkloadHours: estimatedWorkloadHours)
+                    
+                    showReview = viewModel.draftPlan != nil
                 } label: {
                     Text("Generate Study Plan")
                         .font(.headline)
@@ -85,22 +101,13 @@ struct NewAssignmentView: View {
                 .controlSize(.large)
                 .listRowBackground(Color.clear)
             }
-            
-        
-            
-            if let plan = viewModel.draftPlan {
-                Section {
-                    ForEach(plan.sessions) { session in
-                        Label(session.taskTitle, systemImage: "circle")
-                    }
-                } header: {
-                    Text("Suggested Tasks")
-                } footer: {
-                    Text("These tasks are not scheduled yet. Study dates and durations will be set during review.")
-                }
-            }
         }
         .navigationTitle("New Assignment")
+        .navigationDestination(isPresented: $showReview) {
+            if let draft = Binding($viewModel.draftPlan) {
+                StudyPlanReviewView(plan: draft)
+            }
+        }
     }
 }
 

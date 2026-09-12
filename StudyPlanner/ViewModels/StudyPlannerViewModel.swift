@@ -17,6 +17,7 @@ class StudyPlannerViewModel: ObservableObject {
         title: String,
         type: AssignmentType,
         dueDate: Date,
+        estimatedWorkloadHours: Int
     ) {
         draftPlan = nil
         generationError = nil
@@ -24,7 +25,8 @@ class StudyPlannerViewModel: ObservableObject {
         let assignment = UniversityAssignment(
             title: title,
             type: type,
-            dueDate: dueDate
+            dueDate: dueDate,
+            estimatedWorkloadHours: estimatedWorkloadHours
         )
         
         do {

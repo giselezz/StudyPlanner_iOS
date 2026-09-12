@@ -34,8 +34,13 @@ final class StudyPlannerTests: XCTestCase {
         )
         XCTAssertFalse(plan.isApproved)
         XCTAssertTrue(plan.sessions.allSatisfy {
-            $0.startsAt == nil && $0.durationMinutes == nil
+            $0.startsAt == nil
         })
+        
+        XCTAssertEqual(
+            plan.sessions.map { $0.durationMinutes },
+            [120, 60, 240, 60]
+        )
     }
     
     func test_generatePlan_rejectsWhitespaceOnlyTitle() {
