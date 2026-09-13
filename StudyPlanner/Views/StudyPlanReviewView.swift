@@ -61,11 +61,12 @@ struct StudyPlanReviewView: View {
         }
         .navigationTitle("Plan Your Study")
         .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
+            ToolbarItemGroup(placement: .topBarTrailing) {
                 Button("Done") {
                     isDurationFocused = false
                 }
+                .buttonStyle(.glassProminent)
+                .tint(.blue)
             }
         }
     }

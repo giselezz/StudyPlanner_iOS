@@ -68,6 +68,35 @@ final class StudyPlannerTests: XCTestCase {
         }
     }
     
-
+    
+    func test_approvePlan_acceptsValidSession() throws {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [
+                StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 60)
+            ]
+        )
+        
+        let approved = try ApproveStudyPlanUseCase().execute(plan: plan, now: now)
+        
+        XCTAssertTrue(approved.isApproved)
+        XCTAssertEqual(approved.id, plan.id)
+        XCTAssertFalse(plan.isApproved)
+    }
+    
+    func test_approvePlan_rejectsMissingStartTime() {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [
+                StudySession(taskTitle: "Research", durationMinutes: 60)
+            ]
+        )
+        
+        XCTAssertThrowsError(
+            try ApproveStudyPlanUseCase().execute(plan: plan, now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudyPlanApprovalError, .missingStart("Research"))
+        }
+    }
 }
 
