@@ -105,7 +105,7 @@ struct NewAssignmentView: View {
         .navigationTitle("New Assignment")
         .navigationDestination(isPresented: $showReview) {
             if let draft = Binding($viewModel.draftPlan) {
-                StudyPlanReviewView(plan: draft)
+                StudyPlanReviewView(plan: draft, viewModel: viewModel)
             }
         }
     }

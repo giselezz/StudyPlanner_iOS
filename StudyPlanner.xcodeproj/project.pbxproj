@@ -37,6 +37,7 @@
 				ContentView.swift,
 				Domain/Assignment.swift,
 				Domain/StudyPlan.swift,
+				Storage/StudyPlanRepository.swift,
 				StudyPlannerApp.swift,
 				UseCases/StudyPlanUseCases.swift,
 				ViewModels/StudyPlannerViewModel.swift,

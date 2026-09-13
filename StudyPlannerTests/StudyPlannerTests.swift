@@ -98,5 +98,51 @@ final class StudyPlannerTests: XCTestCase {
             XCTAssertEqual(error as? StudyPlanApprovalError, .missingStart("Research"))
         }
     }
+    
+    func test_approvePlan_rejectsZeroDuration() {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [
+                StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 0)
+            ]
+        )
+        
+        XCTAssertThrowsError(
+            try ApproveStudyPlanUseCase().execute(plan: plan, now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudyPlanApprovalError, .invalidDuration("Research"))
+        }
+    }
+    
+    func test_approvePlan_rejectsFinishAfterDeadline() {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(dueAfter: 7200),
+            sessions: [
+                StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 61)
+            ]
+        )
+        
+        XCTAssertThrowsError(
+            try ApproveStudyPlanUseCase().execute(plan: plan, now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudyPlanApprovalError, .finishesAfterDeadline("Research"))
+        }
+    }
+    
+    func test_approvePlan_rejectsOverlappingSessions() {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [
+                StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 60),
+                StudySession(taskTitle: "Outline", startsAt: now.addingTimeInterval(5400), durationMinutes: 30)
+            ]
+        )
+        
+        XCTAssertThrowsError(
+            try ApproveStudyPlanUseCase().execute(plan: plan, now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudyPlanApprovalError, .overlappingSessions)
+        }
+    }
 }
 

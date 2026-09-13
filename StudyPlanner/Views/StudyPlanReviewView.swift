@@ -10,6 +10,8 @@ import SwiftUI
 struct StudyPlanReviewView: View {
     @Binding var plan: AssignmentStudyPlan
     @FocusState private var isDurationFocused: Bool
+    @ObservedObject var viewModel: StudyPlannerViewModel
+    @State private var showApprovalError = false
     
     var body: some View {
         Form {
@@ -52,21 +54,54 @@ struct StudyPlanReviewView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .disabled(plan.isApproved)
             
             Section {
-                Text("This is a draft. Review each task against the assignment brief. Your plan is not approved or saved yet. ")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                if plan.isApproved {
+                    Label("Plan Approved", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                    
+                    Text("Your plan is approved and saved.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Review your plan and approve it to save it to your study planner.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .navigationTitle("Plan Your Study")
+        .alert("Unable to Approve Plan", isPresented: $showApprovalError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.storageError ?? viewModel.approvalError?.localizedDescription ?? "Please review your study times and try again.")
+        }
         .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button("Done") {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Approve") {
                     isDurationFocused = false
+                    
+                    if let approved = viewModel.approvePlan(plan) {
+                        plan = approved
+                    } else {
+                        showApprovalError = true
+                    }
                 }
                 .buttonStyle(.glassProminent)
                 .tint(.blue)
+                .disabled(plan.isApproved)
+            }
+            
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                
+                Button {
+                    isDurationFocused = false
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                }
+                .accessibilityLabel(Text("Dismiss Keyboard"))
             }
         }
     }
@@ -88,6 +123,6 @@ struct StudyPlanReviewView: View {
     )
     
     NavigationStack {
-        StudyPlanReviewView(plan: $plan)
+        StudyPlanReviewView(plan: $plan, viewModel: StudyPlannerViewModel())
     }
 }
