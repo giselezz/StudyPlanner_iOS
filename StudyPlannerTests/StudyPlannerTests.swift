@@ -144,5 +144,47 @@ final class StudyPlannerTests: XCTestCase {
             XCTAssertEqual(error as? StudyPlanApprovalError, .overlappingSessions)
         }
     }
+    
+    func test_completeSession_updatesProgress() throws {
+        let session = StudySession(taskTitle: "Research")
+        let plan = AssignmentStudyPlan(
+            assignment: essay(), sessions: [session, StudySession(taskTitle: "Outline")],
+            isApproved: true
+        )
+        
+        let updated = try CompleteStudySessionUseCase().execute(plan: plan, sessionID: session.id)
+        
+        XCTAssertTrue(updated.sessions[0].isCompleted)
+        XCTAssertFalse(updated.sessions[1].isCompleted)
+        XCTAssertEqual(updated.progress, 0.5)
+        XCTAssertFalse(plan.sessions[0].isCompleted)
+    }
+    
+    func test_completeSession_rejectsUnapprovedPlan() {
+        let session = StudySession(taskTitle: "Research")
+        let plan = AssignmentStudyPlan(
+            assignment: essay(), sessions: [session]
+        )
+        
+        XCTAssertThrowsError(
+            try CompleteStudySessionUseCase().execute(plan: plan, sessionID: session.id)
+            ) { error in
+            XCTAssertEqual(error as? StudySessionCompletionError, .planNotApproved)
+        }
+    }
+    
+    func test_completeSession_rejectsUnknownSession() {
+        let plan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [StudySession(taskTitle: "Research")],
+            isApproved: true
+        )
+        
+        XCTAssertThrowsError(
+            try CompleteStudySessionUseCase().execute(plan: plan, sessionID: UUID())
+            ) { error in
+            XCTAssertEqual(error as? StudySessionCompletionError, .sessionNotFound)
+        }
+    }
 }
 

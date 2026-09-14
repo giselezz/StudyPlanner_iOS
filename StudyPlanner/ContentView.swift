@@ -12,7 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            NewAssignmentView(viewModel: viewModel)
+            StudyPlanListView(viewModel: viewModel)
         }
     }
 }

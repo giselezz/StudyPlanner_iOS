@@ -143,3 +143,36 @@ struct ApproveStudyPlanUseCase {
         return approvedPlan
     }
 }
+
+enum StudySessionCompletionError: LocalizedError, Equatable {
+    case planNotApproved
+    case sessionNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .planNotApproved:
+            return "Approve your study plan before completing tasks."
+        case .sessionNotFound:
+            return "This task could not be found. Reopen the plan and try again."
+        }
+    }
+}
+
+struct CompleteStudySessionUseCase {
+    func execute(
+        plan: AssignmentStudyPlan,
+        sessionID: UUID) throws -> AssignmentStudyPlan {
+            guard plan.isApproved else {
+                throw StudySessionCompletionError.planNotApproved
+            }
+            
+            guard let index = plan.sessions.firstIndex(where: {$0.id == sessionID}) else {
+                throw StudySessionCompletionError.sessionNotFound
+            }
+            
+            var updatedPlan = plan
+            updatedPlan.sessions[index].isCompleted = true
+            return updatedPlan
+            
+        }
+}
