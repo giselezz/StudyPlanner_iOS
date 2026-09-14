@@ -277,5 +277,41 @@ final class StudyPlannerTests: XCTestCase {
             XCTAssertEqual(error as? StudySessionRescheduledError, .overlapAnotherSession)
         }
     }
+    
+    func test_deletePlan_removesOnlySelectedPlan() throws {
+        let selectedPlan = AssignmentStudyPlan(
+            assignment: essay(title: "History Essay"),
+            sessions: [StudySession(taskTitle: "Research")]
+        )
+        let otherPlan = AssignmentStudyPlan(
+            assignment: essay(title: "Literature Essay"),
+            sessions: [StudySession(taskTitle: "Draft")]
+        )
+        let originalPlans = [selectedPlan, otherPlan]
+
+        let updatedPlans = try DeleteStudyPlanUseCase().execute(
+            plans: originalPlans,
+            planID: selectedPlan.id
+        )
+
+        XCTAssertEqual(updatedPlans.count, 1)
+        XCTAssertEqual(updatedPlans.first?.id, otherPlan.id)
+        XCTAssertEqual(originalPlans.count, 2)
+    }
+
+    func test_deletePlan_rejectsUnknownPlan() {
+        let savedPlan = AssignmentStudyPlan(
+            assignment: essay(),
+            sessions: [StudySession(taskTitle: "Research")]
+        )
+
+        XCTAssertThrowsError(
+            try DeleteStudyPlanUseCase().execute(
+                plans: [savedPlan], planID: UUID()
+            )
+        ) { error in
+            XCTAssertEqual(error as? StudyPlanDeletionError, .planNotFound)
+        }
+    }
 }
 

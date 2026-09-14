@@ -7,8 +7,25 @@
 
 import Foundation
 
+/// Describes how an assessment format breaks work into study tasks.
+///
+/// Provides academic task names and their relative workload weights.
+/// Each task must have a matching positive weight.
+///
+/// Generation uses these proportions to suggest durations.
+/// They are starting estimates, not guaranteed study times.
 
-enum AssignmentType: String, CaseIterable, Codable {
+protocol StudyTaskTemplate {
+    var suggestedTasks: [String] { get }
+    var workloadWeights: [Int] { get }
+}
+
+/// An assessment format, such as an essay, report or presentation. 
+///
+/// Each format supplies suggested academic tasks and workload weights.
+/// Students can review the resulting durations before approving a plan.
+
+enum AssignmentType: String, CaseIterable, Codable, StudyTaskTemplate {
     case essay = "Essay"
     case report = "Report"
     case presentation = "Presentation"
@@ -34,7 +51,17 @@ enum AssignmentType: String, CaseIterable, Codable {
     }
 }
 
-
+/// A university assignment that a student wants to create a study plan for.
+///
+/// Stores the assignment's title, type, submission deadline and
+/// estimated total workload in hours.
+///
+/// Business rules: generating a plan requires a title that is not blank after trimming whitespace,
+/// a deadline later than the current time,
+/// and an estimated workload between 1 and 100 hours.
+///
+/// GenerateStudyPlanUseCase enforces these rules;
+/// this model stores the assignment details.
 
 struct UniversityAssignment: Identifiable, Codable {
     let id: UUID

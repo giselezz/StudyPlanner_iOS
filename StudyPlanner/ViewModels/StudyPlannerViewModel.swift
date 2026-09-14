@@ -149,28 +149,39 @@ class StudyPlannerViewModel: ObservableObject {
             rescheduleError = error.localizedDescription
             return false
         } catch {
-            rescheduleError = "Failed to save your progress. Please try again"
+            rescheduleError = "Your new study time could not be saved. Try again, or tap Cancel to keep the original time."
             return false
         }
     }
     
     func deletePlan(planID: UUID) -> Bool {
         deletionError = nil
-        
+
         do {
-            var updatedPlans = try repository.load()
-            updatedPlans.removeAll(where: { $0.id == planID })
-            
+            let savedPlans = try repository.load()
+
+            let updatedPlans = try DeleteStudyPlanUseCase().execute(
+                plans: savedPlans,
+                planID: planID
+            )
+
             try repository.save(updatedPlans)
             plans = updatedPlans
             storageError = nil
-            
+
             if draftPlan?.id == planID {
                 draftPlan = nil
             }
+
             return true
+        } catch let error as StudyPlanDeletionError {
+            deletionError = error.localizedDescription
+            return false
         } catch {
-            deletionError = "Failed to delete the plan. Please try again"
+            deletionError = """
+            The deletion could not be saved. Try again, \
+            or tap Cancel to leave this plan unchanged.
+            """
             return false
         }
     }

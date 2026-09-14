@@ -17,7 +17,7 @@ enum StudyPlanGenerationError: LocalizedError, Equatable {
         case .blankTitle:
             return "Study plan title cannot be blank."
         case .deadlinePassed:
-            return "Deadline cannot be in the past."
+            return "Choose a submission deadline later than now."
         case .invalidWorkload:
             return "Choose a total study time between 1 and 100 hours."
         }
@@ -47,8 +47,9 @@ struct GenerateStudyPlanUseCase {
         var cleanedAssignment = assignment
         cleanedAssignment.title = title
         
-        let tasks = assignment.type.suggestedTasks
-        let weights = assignment.type.workloadWeights
+        let template: any StudyTaskTemplate = assignment.type
+        let tasks = template.suggestedTasks
+        let weights = template.workloadWeights
         let totalMinutes = assignment.estimatedWorkloadHours * 60
         let totalWeight = weights.reduce(0, +)
         var remainingMinutes = totalMinutes
@@ -86,7 +87,7 @@ enum StudyPlanApprovalError: LocalizedError, Equatable {
         case .missingStart(let task):
             return "Choose a start time for \(task)."
         case .invalidDuration(let task):
-            return "Study session for \(task) has invalid duration."
+            return "Enter a duration greater than zero minutes for \(task)."
         case .startTimeInPast(let task):
             return "Choose a future start time for \(task)."
         case .finishesAfterDeadline(let task):
@@ -197,11 +198,11 @@ enum StudySessionRescheduledError: LocalizedError, Equatable {
         case .invalidSchedule(let task):
             return "Check the start time and duration for \(task)."
         case .startTimeInPast:
-            return "The start time cannot be in the past."
+            return "Choose a new start time that is not in the past."
         case .finishesAfterDeadline:
-            return "The task's end time is after the deadline."
+            return "This session finishes after submission. Choose an earlier start time."
         case .overlapAnotherSession:
-            return "The new schedule overlaps with another session."
+            return "This time overlaps another unfinished task in this plan. Choose a different start time."
         }
     }
 }
@@ -258,5 +259,29 @@ struct RescheduleStudySessionUseCase {
         var updatedPlan = plan
         updatedPlan.sessions[index].startsAt = startsAt
         return updatedPlan
+    }
+}
+
+enum StudyPlanDeletionError: LocalizedError, Equatable {
+    case planNotFound
+
+    var errorDescription: String? {
+        switch self {
+        case .planNotFound:
+            return "This plan could not be found. Return to Study Plans and check whether it has already been deleted."
+        }
+    }
+}
+
+struct DeleteStudyPlanUseCase {
+    func execute(
+        plans: [AssignmentStudyPlan],
+        planID: UUID
+    ) throws -> [AssignmentStudyPlan] {
+        guard plans.contains(where: { $0.id == planID }) else {
+            throw StudyPlanDeletionError.planNotFound
+        }
+
+        return plans.filter { $0.id != planID }
     }
 }
