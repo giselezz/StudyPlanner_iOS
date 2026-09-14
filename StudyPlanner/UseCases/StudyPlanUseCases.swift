@@ -125,7 +125,7 @@ struct ApproveStudyPlanUseCase {
                 throw StudyPlanApprovalError.startTimeInPast(session.taskTitle)
             }
             
-            let end = start.addingTimeInterval(Double(minutes * 60))
+            let end = start.addingTimeInterval(Double(minutes) * 60)
             
             guard end <= plan.assignment.dueDate else {
                 throw StudyPlanApprovalError.finishesAfterDeadline(session.taskTitle)
@@ -235,7 +235,7 @@ struct RescheduleStudySessionUseCase {
             throw StudySessionRescheduledError.startTimeInPast
         }
         
-        let end = startsAt.addingTimeInterval(Double(minutes * 60))
+        let end = startsAt.addingTimeInterval(Double(minutes) * 60)
         
         guard end <= plan.assignment.dueDate else {
             throw StudySessionRescheduledError.finishesAfterDeadline
@@ -248,7 +248,7 @@ struct RescheduleStudySessionUseCase {
                 throw StudySessionRescheduledError.invalidSchedule(other.taskTitle)
             }
             
-            let otherEnd = otherStart.addingTimeInterval(Double(otherMinutes * 60))
+            let otherEnd = otherStart.addingTimeInterval(Double(otherMinutes) * 60)
             
             if startsAt < otherEnd && otherStart < end {
                 throw StudySessionRescheduledError.overlapAnotherSession

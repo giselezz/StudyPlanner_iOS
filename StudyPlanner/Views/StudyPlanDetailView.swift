@@ -14,6 +14,8 @@ struct StudyPlanDetailView: View {
     @State private var editingSessionID: UUID?
     @State private var newStart = Date()
     @State private var showRescheduleError = false
+    @State private var showDeleteConfirmation = false
+    @State private var didDeletePlan = false
     
     var body: some View {
         Group {
@@ -84,6 +86,15 @@ struct StudyPlanDetailView: View {
                             }
                         }
                     }
+                    
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Label("Delete Plan", systemImage: "trash")
+                        }
+                        .disabled(editingSessionID != nil)
+                    }
                 }
             } else {
                 ContentUnavailableView(
@@ -107,6 +118,64 @@ struct StudyPlanDetailView: View {
             Text(
                 viewModel.rescheduleError ?? "An unknown error occurred. Please try again."
             )
+        }
+        
+        .sheet(isPresented: $showDeleteConfirmation, onDismiss: {
+            if didDeletePlan {
+                didDeletePlan = false
+                viewModel.navigationPath.removeAll()
+            }
+        }) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Image(systemName: "trash.circle.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.red)
+                        .accessibilityHidden(true)
+
+                    Text("Delete this plan?")
+                        .font(.title2.bold())
+
+                    Text("This permanently deletes the plan, its sessions and its progress from this device. This cannot be undone.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    if let message = viewModel.deletionError {
+                        Text(message)
+                            .font(.callout)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    Button("Cancel", role: .cancel) {
+                        showDeleteConfirmation = false
+                    }
+                    .buttonStyle(.glass)
+                    .controlSize(.large)
+
+                    Button(role: .destructive) {
+                        if viewModel.deletePlan(planID: planID) {
+                            didDeletePlan = true
+                            showDeleteConfirmation = false
+                        }
+                    } label: {
+                        Text("Delete Plan")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.red)
+                    .controlSize(.large)
+                }
+                .padding(24)
+                .frame(maxWidth: 500)
+                .frame(maxWidth: .infinity)
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .onAppear {
+                viewModel.deletionError = nil
+            }
         }
     }
 }

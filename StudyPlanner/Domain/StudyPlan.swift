@@ -18,7 +18,7 @@ struct StudySession: Codable, Identifiable {
         guard let start = startsAt, let minutes = durationMinutes else {
             return nil
         }
-        return start.addingTimeInterval(Double(minutes * 60))
+        return start.addingTimeInterval(Double(minutes) * 60)
     }
 }
 

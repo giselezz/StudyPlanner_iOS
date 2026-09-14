@@ -1,82 +1,49 @@
 # StudyPlanner
 
-A SwiftUI iOS app that helps university students break assignments into manageable study tasks, track progress and reschedule missed work.
+## Project Overview
 
-## Project Status
+StudyPlanner is a SwiftUI iOS app that helps university students break assignments into smaller study tasks. Students enter an assignment’s details and estimated workload, then receive suggested tasks and durations. 
 
-Initial Xcode project setup. The features and architecture below describe the planned MVP and are not yet implemented.
+They can review the suggestions, choose study times and approve their plan. Saved plans support tracking task completion, rescheduling unfinished sessions and deleting plans that are no longer needed. 
 
-## Domain and Stakeholder
+## Implemented Features
 
-University students balance assignment deadlines with classes, employment and personal commitments. Large assessments can be difficult to start, and missing a study session can leave students unsure how to reorganise their work.
+- **Assignment entry:** Enter a title, assignment type, submission deadline and estimated workload. 
+- **Task suggestions:** Generate tasks and suggested durations for essays, reports and presentations. 
+- **Plan review:** Adjust task durations and choose study start times before approval. 
+- **Schedule validation:** Check for missing times, invalid durations, past starts, overlapping sessions and sessions finishing after the deadline. 
+- **Approval confirmation:** Confirm successful approval and saving, with buttons to return home or view plan details. 
+- **Saved plans:** Browse plans in deadline order and view task-completion progress. 
+- **Task completion:** Mark individual study sessions as completed. 
+- **Rescheduling:** Move unfinished sessions while keeping their durations and checking for conflicts within the same plan. 
+- **Plan deletion:** Delete a saved plan through a confirmation sheet with Cancel and Delete actions. 
+- **Local storage:** Save approved plans and subsequent changes as JSON so they remain available after relaunching the app. 
 
-StudyPlanner will support students by suggesting academic task templates, keeping submission deadlines visible and allowing students to review their plans and reschedule unfinished work.
+## Domain Context
 
-## Planned MVP
+University students often balance assignments with classes, part-time work and personal commitments. Knowing a submission deadline does not always make it clear how to start or divide the workload. 
 
-1. Enter an assignment title, assessment type and submission deadline.
-2. Generate suggested tasks from a fixed template, such as research, outline, draft and edit for an essay.
-3. Review task dates and approve the study plan.
-4. Track completion and reschedule missed study sessions before submission.
+StudyPlanner provides a starting point through task templates for essays, reports and presentations. Suggested durations are editable estimates, while students choose start times based on their own availability. The app checks scheduling rules but does not read assignment briefs or automatically organise the student’s timetable. 
 
-Students will select study dates themselves. Automatic scheduling and AI interpretation of assignment briefs are outside the initial scope.
+## Architecture Summary
 
-## Four Planned Screens
+The app uses MVVM with a separate Use Case layer. 
 
-- **Assignment List:** view assignments and access the assignment-entry screen.
-- **New Assignment:** enter assessment details and generate a draft plan.
-- **Study Plan Review:** review suggested tasks and dates, then approve the plan.
-- **Assignment Detail:** view progress, mark work complete and reschedule missed sessions.
+- **Views:** SwiftUI screens display plans, collect input and show feedback.
+- **ViewModel:** `StudyPlannerViewModel` manages shared state, navigation and coordination between use cases and storage. 
+- **Use Cases:** `GenerateStudyPlanUseCase`, `ApproveStudyPlanUseCase`, `CompleteStudySessionUseCase` and `RescheduleStudySessionUseCase` enforce business rules such as valid deadlines, positive durations and non-overlapping sessions. 
+- **Domain Models:** `UniversityAssignment`, `StudySession` and `AssignmentStudyPlan` represent the assignment and its planned work. `AssignmentType` provides task templates and workload proportions. 
+- **Repository:** `StudyPlanRepository` separates persistence from its JSON implementation. `JSONStudyPlanRepository` stores plans in the app’s Documents directory. 
 
-## Planned Architecture
+Domain records use structs, while the ViewModel uses a class because multiple screens share its mutable state. Use cases return updated records, and the ViewModel coordinates saving them. 
 
-SwiftUI Views → ViewModel → Use Case structs → Domain Models and Repository → Local Storage
+Deletion currently runs directly through the ViewModel and repository rather than a dedicated use case. 
 
-Domain records will use structs. Shared presentation state will use a class. A study-plan repository protocol will separate saving and retrieving academic plans from storage details.
+## Setup Instructions
 
-The three primary Use Cases will be:
-
-- `GenerateStudyPlanUseCase`
-- `ApproveStudyPlanUseCase`
-- `RescheduleMissedStudySessionUseCase`
-
-Each Use Case will define typed domain errors with messages explaining what the student can do next. Significant additional business operations will also follow the required Use Case structure.
-
-## Initial Business Rules
-
-- Assignment titles cannot be blank.
-- A submission deadline must be in the future when generating a plan.
-- A plan must contain study tasks before it can be approved.
-- Planned sessions must finish before the submission deadline.
-- An approved plan cannot be approved again.
-- Completed sessions cannot be rescheduled.
-- A replacement session must be in the future and finish before submission.
-- Rescheduling must retain the unfinished work.
-
-## Testing and Documentation
-
-The project will include at least eight meaningful unit tests covering the three primary Use Cases. Each will have happy-path and failure coverage, with additional tests for business-rule boundaries and major errors.
-
-Core domain models will have DocC comments explaining their real-world meaning and business rules. The assessment also requires a one-page Human-System Architecture diagram and a 600–800-word reflective report.
-
-## Running the Project
-
-1. Clone the repository using GitHub Desktop or Git.
-2. Open `StudyPlanner.xcodeproj` in Xcode on a Mac.
-3. Select the `StudyPlanner` scheme and a compatible iPhone simulator.
-4. Choose **Product → Run**.
-5. Choose **Product → Test** to run the available tests.
-
-Currently, the app displays the starter screen. Domain tests will be added during implementation. Tested Xcode and iOS versions will be recorded before submission.
-
-## Out of Scope
-
-- AI assignment-brief analysis
-- Automatic availability-based scheduling
-- Apple Calendar integration
-- Home-screen widgets
-- Accounts and cloud synchronisation
-
-## Assessment Context
-
-Individual project for Assessment 2 in **40005 Advanced iOS Development**. The implementation will aim to stay compact while preserving the required screens, domain architecture, error handling and tests.
+1. Clone or download the repository. 
+2. Open `StudyPlanner.xcodeproj` in Xcode. 
+3. Use an Xcode version with the iOS 26.5 SDK and select an iPhone simulator running iOS 26.5 or later. 
+4. Select the `StudyPlanner` scheme. 
+5. Choose **Product > Run** to launch the app. 
+6. Choose **Product > Test** to run the tests. 

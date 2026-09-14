@@ -25,6 +25,7 @@ class StudyPlannerViewModel: ObservableObject {
     @Published var completionError: String?
     @Published var navigationPath: [StudyPlannerRoute] = []
     @Published var rescheduleError: String?
+    @Published var deletionError: String?
     
     private let repository: any StudyPlanRepository
     
@@ -149,6 +150,27 @@ class StudyPlannerViewModel: ObservableObject {
             return false
         } catch {
             rescheduleError = "Failed to save your progress. Please try again"
+            return false
+        }
+    }
+    
+    func deletePlan(planID: UUID) -> Bool {
+        deletionError = nil
+        
+        do {
+            var updatedPlans = try repository.load()
+            updatedPlans.removeAll(where: { $0.id == planID })
+            
+            try repository.save(updatedPlans)
+            plans = updatedPlans
+            storageError = nil
+            
+            if draftPlan?.id == planID {
+                draftPlan = nil
+            }
+            return true
+        } catch {
+            deletionError = "Failed to delete the plan. Please try again"
             return false
         }
     }
