@@ -42,6 +42,8 @@
 				UseCases/StudyPlanUseCases.swift,
 				ViewModels/StudyPlannerViewModel.swift,
 				Views/NewAssignmentView.swift,
+				Views/PlanApprovedView.swift,
+				Views/StudyPlanDetailView.swift,
 				Views/StudyPlanListView.swift,
 				Views/StudyPlanReviewView.swift,
 			);

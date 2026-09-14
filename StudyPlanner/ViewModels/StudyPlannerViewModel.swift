@@ -8,6 +8,13 @@
 import Foundation
 import Combine
 
+enum StudyPlannerRoute: Hashable {
+    case newAssignment
+    case review
+    case approved(UUID)
+    case details(UUID)
+}
+
 @MainActor
 class StudyPlannerViewModel: ObservableObject {
     @Published var draftPlan: AssignmentStudyPlan?
@@ -15,12 +22,16 @@ class StudyPlannerViewModel: ObservableObject {
     @Published var approvalError: StudyPlanApprovalError?
     @Published private(set) var plans: [AssignmentStudyPlan] = []
     @Published var storageError: String?
+    @Published var completionError: String?
+    @Published var navigationPath: [StudyPlannerRoute] = []
     
     private let repository: any StudyPlanRepository
     
-    init(
-        repository: any StudyPlanRepository = JSONStudyPlanRepository()
-    ) {
+    convenience init() {
+        self.init(repository: JSONStudyPlanRepository())
+    }
+    
+    init(repository: any StudyPlanRepository) {
         self.repository = repository
         
         do {
@@ -81,6 +92,35 @@ class StudyPlannerViewModel: ObservableObject {
         } catch {
             storageError = "Failed to save your plan. Please try again"
             return nil
+        }
+    }
+    
+    func completeSession(planID: UUID, sessionID: UUID) -> Bool {
+        completionError = nil
+        
+        do {
+            var updatedPlans = try repository.load()
+            
+            guard let index = updatedPlans.firstIndex(where: { $0.id == planID}) else {
+                completionError = "Failed to find the plan, please try again."
+                return false
+            }
+            
+            updatedPlans[index] = try CompleteStudySessionUseCase().execute(
+                plan: updatedPlans[index],
+                sessionID: sessionID
+            )
+            
+            try repository.save(updatedPlans)
+            plans = updatedPlans
+            storageError = nil
+            return true
+        } catch let error as StudySessionCompletionError {
+            completionError = error.localizedDescription
+            return false
+        } catch {
+            completionError = "Failed to save your progress. Please try again"
+            return false
         }
     }
 }

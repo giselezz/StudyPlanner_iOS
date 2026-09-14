@@ -11,12 +11,28 @@ struct ContentView: View {
     @StateObject private var viewModel = StudyPlannerViewModel()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $viewModel.navigationPath) {
             StudyPlanListView(viewModel: viewModel)
+                .navigationDestination(for: StudyPlannerRoute.self) { route in
+                    switch route {
+                    case .newAssignment:
+                        NewAssignmentView(viewModel: viewModel)
+                    case .review:
+                        if let draft = Binding($viewModel.draftPlan) {
+                            StudyPlanReviewView(plan: draft, viewModel: viewModel)
+                        }
+                    case .approved(let id):
+                        PlanApprovedView(viewModel: viewModel, planID: id)
+                    case .details(let id):
+                        StudyPlanDetailView(viewModel: viewModel, planID: id)
+                    }
+                }
         }
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

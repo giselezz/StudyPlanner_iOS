@@ -13,7 +13,6 @@ struct NewAssignmentView: View {
     @State private var title = ""
     @State private var type: AssignmentType = .essay
     @State private var dueDate: Date = Date().addingTimeInterval(86400)
-    @State private var showReview = false
     @State private var estimatedWorkloadHours = 8
     @FocusState private var isTitleFocused: Bool
     
@@ -90,7 +89,9 @@ struct NewAssignmentView: View {
                     
                     viewModel.generatePlan(title: title, type: type, dueDate: dueDate, estimatedWorkloadHours: estimatedWorkloadHours)
                     
-                    showReview = viewModel.draftPlan != nil
+                    if viewModel.draftPlan != nil {
+                        viewModel.navigationPath.append(.review)
+                    }
                 } label: {
                     Text("Generate Study Plan")
                         .font(.headline)
@@ -103,11 +104,6 @@ struct NewAssignmentView: View {
             }
         }
         .navigationTitle("New Assignment")
-        .navigationDestination(isPresented: $showReview) {
-            if let draft = Binding($viewModel.draftPlan) {
-                StudyPlanReviewView(plan: draft, viewModel: viewModel)
-            }
-        }
     }
 }
 

@@ -84,6 +84,7 @@ struct StudyPlanReviewView: View {
                     
                     if let approved = viewModel.approvePlan(plan) {
                         plan = approved
+                        viewModel.navigationPath = [.approved(approved.id)]
                     } else {
                         showApprovalError = true
                     }
