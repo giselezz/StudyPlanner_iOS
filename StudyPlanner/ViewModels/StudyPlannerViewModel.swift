@@ -24,6 +24,7 @@ class StudyPlannerViewModel: ObservableObject {
     @Published var storageError: String?
     @Published var completionError: String?
     @Published var navigationPath: [StudyPlannerRoute] = []
+    @Published var rescheduleError: String?
     
     private let repository: any StudyPlanRepository
     
@@ -120,6 +121,34 @@ class StudyPlannerViewModel: ObservableObject {
             return false
         } catch {
             completionError = "Failed to save your progress. Please try again"
+            return false
+        }
+    }
+    
+    func rescheduleSession(planID: UUID, sessionID: UUID, startsAt: Date) -> Bool {
+        rescheduleError = nil
+        
+        do {
+            var updatedPlans = try repository.load()
+            
+            guard let index = updatedPlans.firstIndex(where: { $0.id == planID }) else {
+                rescheduleError = "This plan could not be found. Reopen your saved plans."
+                return false
+            }
+            
+            updatedPlans[index] = try RescheduleStudySessionUseCase().execute(
+                plan: updatedPlans[index], sessionID: sessionID, startsAt: startsAt
+            )
+            
+            try repository.save(updatedPlans)
+            plans = updatedPlans
+            storageError = nil
+            return true
+        } catch let error as StudySessionRescheduledError {
+            rescheduleError = error.localizedDescription
+            return false
+        } catch {
+            rescheduleError = "Failed to save your progress. Please try again"
             return false
         }
     }

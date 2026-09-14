@@ -237,5 +237,45 @@ final class StudyPlannerTests: XCTestCase {
             )
         }
     }
+    
+    private func rescheduleExamplePlan() -> AssignmentStudyPlan {
+        AssignmentStudyPlan(
+            assignment: essay(dueAfter: 18000),
+            sessions: [
+                StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 60),
+                StudySession(taskTitle: "Outline", startsAt: now.addingTimeInterval(10800), durationMinutes: 60)
+            ],
+            isApproved: true
+        )
+    }
+    
+    func test_rescheduleSession_acceptsExactDeadline() throws {
+        let plan = rescheduleExamplePlan()
+        
+        let updated = try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: plan.sessions[0].id, startsAt: now.addingTimeInterval(14400), now: now)
+        
+        XCTAssertEqual(updated.sessions[0].endsAt, plan.assignment.dueDate)
+        XCTAssertEqual(updated.sessions[1].startsAt, plan.sessions[1].startsAt)
+    }
+    
+    func test_rescheduleSession_rejectsFinishAfterDeadline() {
+        let plan = rescheduleExamplePlan()
+        
+        XCTAssertThrowsError(
+            try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: plan.sessions[0].id, startsAt: now.addingTimeInterval(14460), now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudySessionRescheduledError, .finishesAfterDeadline)
+        }
+    }
+    
+    func test_rescheduleSession_rejectsOverlap() {
+        let plan = rescheduleExamplePlan()
+        
+        XCTAssertThrowsError(
+            try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: plan.sessions[0].id, startsAt: now.addingTimeInterval(12600), now: now)
+        ) { error in
+            XCTAssertEqual(error as? StudySessionRescheduledError, .overlapAnotherSession)
+        }
+    }
 }
 

@@ -11,6 +11,9 @@ struct StudyPlanDetailView: View {
     @ObservedObject var viewModel: StudyPlannerViewModel
     let planID: UUID
     @State private var showCompletionError = false
+    @State private var editingSessionID: UUID?
+    @State private var newStart = Date()
+    @State private var showRescheduleError = false
     
     var body: some View {
         Group {
@@ -38,12 +41,46 @@ struct StudyPlanDetailView: View {
                             if session.isCompleted {
                                 Label("Completed", systemImage: "checkmark.circle.fill")
                                     .foregroundColor(.green)
+                            } else if editingSessionID == session.id {
+                                DatePicker("New Start Time", selection: $newStart, displayedComponents: [.date, .hourAndMinute]
+                                )
+                                
+                                Text("The duration stays unchanged. You new time is saved only when you tap Save.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    Button("Cancel", role: .cancel) {
+                                        editingSessionID = nil
+                                    }
+                                    .buttonStyle(.bordered)
+                                    
+                                    Spacer()
+                                    
+                                    Button("Save") {
+                                        if viewModel.rescheduleSession(planID: plan.id, sessionID: session.id, startsAt: newStart) {
+                                            editingSessionID = nil
+                                        } else {
+                                            showRescheduleError = true
+                                        }
+                                    }
+                                    .buttonStyle(.glassProminent)
+                                    .tint(.blue)
+                                }
                             } else {
                                 Button("Mark as Completed") {
-                                    showCompletionError = !viewModel.completeSession(planID: planID, sessionID: session.id)
+                                    showCompletionError = !viewModel.completeSession(planID: plan.id, sessionID: session.id)
                                 }
                                 .buttonStyle(.glassProminent)
                                 .tint(.blue)
+                                .disabled(editingSessionID != nil)
+                                
+                                Button("Reschedule") {
+                                    newStart = max (session.startsAt ?? Date(), Date().addingTimeInterval(3600))
+                                    editingSessionID = session.id
+                                }
+                                .buttonStyle(.bordered)
+                                .disabled(editingSessionID != nil)
                             }
                         }
                     }
@@ -62,6 +99,13 @@ struct StudyPlanDetailView: View {
         } message: {
             Text(
                 viewModel.completionError ?? "An unknown error occurred. Please try again."
+            )
+        }
+        .alert("Unable to reschedule", isPresented: $showRescheduleError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(
+                viewModel.rescheduleError ?? "An unknown error occurred. Please try again."
             )
         }
     }
