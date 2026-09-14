@@ -39,7 +39,7 @@ class StudyPlannerViewModel: ObservableObject {
         do {
             plans = try repository.load()
         } catch {
-            storageError = "Saved plans could not be loaded. Your saved files has not been changed"
+            storageError = "Saved plans could not be loaded. Your saved file has not been changed"
         }
     }
     

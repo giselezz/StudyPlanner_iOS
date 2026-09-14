@@ -49,7 +49,7 @@ struct StudyPlanReviewView: View {
                         }
                     }
                     
-                    Text("Suggest duration. Choose a start time that suits your availability.")
+                    Text("Suggested duration. Choose a start time that suits your availability.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

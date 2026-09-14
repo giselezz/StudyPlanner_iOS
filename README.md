@@ -37,7 +37,7 @@ The app uses MVVM with a separate Use Case layer.
 
 Domain records use structs, while the ViewModel uses a class because multiple screens share its mutable state. Use cases return updated records, and the ViewModel coordinates saving them. 
 
-Deletion currently runs directly through the ViewModel and repository rather than a dedicated use case. 
+Deletion uses DeleteStudyPlanUseCase, while the ViewModel coordinates loading and saving.
 
 ## Setup Instructions
 

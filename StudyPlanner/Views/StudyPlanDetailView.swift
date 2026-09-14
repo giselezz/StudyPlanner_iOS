@@ -47,7 +47,7 @@ struct StudyPlanDetailView: View {
                                 DatePicker("New Start Time", selection: $newStart, displayedComponents: [.date, .hourAndMinute]
                                 )
                                 
-                                Text("The duration stays unchanged. You new time is saved only when you tap Save.")
+                                Text("The duration stays unchanged. Your new time is saved only when you tap Save.")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 
@@ -109,14 +109,14 @@ struct StudyPlanDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(
-                viewModel.completionError ?? "An unknown error occurred. Please try again."
+                viewModel.completionError ?? "Your progress could not be saved. Try marking the task complete again."
             )
         }
         .alert("Unable to reschedule", isPresented: $showRescheduleError) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(
-                viewModel.rescheduleError ?? "An unknown error occurred. Please try again."
+                viewModel.rescheduleError ?? "Your new study time could not be saved. Try again, or tap Cancel to keep the original time."
             )
         }
         
