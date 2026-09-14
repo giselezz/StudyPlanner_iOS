@@ -186,5 +186,56 @@ final class StudyPlannerTests: XCTestCase {
             XCTAssertEqual(error as? StudySessionCompletionError, .sessionNotFound)
         }
     }
+    
+    func test_rescheduleSession_movesMissedSession() throws {
+        let session = StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(-7200), durationMinutes: 60)
+        let plan = AssignmentStudyPlan(
+            assignment: essay(), sessions: [session],
+            isApproved: true
+        )
+        
+        let newTime = now.addingTimeInterval(3600)
+        
+        let updated = try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: session.id, startsAt: newTime, now: now)
+        
+        XCTAssertEqual(updated.sessions[0].startsAt, newTime)
+        XCTAssertEqual(updated.sessions[0].durationMinutes, 60)
+        XCTAssertFalse(updated.sessions[0].isCompleted)
+        XCTAssertTrue(updated.isApproved)
+        XCTAssertEqual(plan.sessions[0].startsAt, session.startsAt)
+    }
+    
+    func test_rescheduleSession_rejectsPastStart() {
+        let session = StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(3600), durationMinutes: 60
+        )
+        
+        let plan = AssignmentStudyPlan(
+            assignment: essay(), sessions: [session],isApproved: true
+        )
+        
+        XCTAssertThrowsError(
+            try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: session.id, startsAt: now.addingTimeInterval(-1), now: now
+            )
+        ) { error in
+            XCTAssertEqual(error as? StudySessionRescheduledError, .startTimeInPast
+            )
+        }
+    }
+    
+    func test_rescheduleSession_rejectsCompletedTask() {
+        let session = StudySession(taskTitle: "Research", startsAt: now.addingTimeInterval(-7200), durationMinutes: 60, isCompleted: true)
+        
+        let plan = AssignmentStudyPlan(
+            assignment: essay(), sessions: [session],isApproved: true
+        )
+        
+        XCTAssertThrowsError(
+            try RescheduleStudySessionUseCase().execute(plan: plan, sessionID: session.id, startsAt: now.addingTimeInterval(3600), now: now
+            )
+        ) { error in
+            XCTAssertEqual(error as? StudySessionRescheduledError, .alreadyCompleted
+            )
+        }
+    }
 }
 

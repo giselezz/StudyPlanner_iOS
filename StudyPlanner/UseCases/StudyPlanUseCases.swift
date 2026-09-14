@@ -176,3 +176,87 @@ struct CompleteStudySessionUseCase {
             
         }
 }
+
+enum StudySessionRescheduledError: LocalizedError, Equatable {
+    case planNotApproved
+    case sessionNotFound
+    case alreadyCompleted
+    case invalidSchedule(String)
+    case startTimeInPast
+    case finishesAfterDeadline
+    case overlapAnotherSession
+    
+    var errorDescription: String? {
+        switch self {
+        case .planNotApproved:
+            return "Approve your study plan before rescheduling tasks."
+        case .sessionNotFound:
+            return "This task could not be found. Reopen the plan and try again."
+        case .alreadyCompleted:
+            return "Completed tasks cannot be rescheduled."
+        case .invalidSchedule(let task):
+            return "Check the start time and duration for \(task)."
+        case .startTimeInPast:
+            return "The start time cannot be in the past."
+        case .finishesAfterDeadline:
+            return "The task's end time is after the deadline."
+        case .overlapAnotherSession:
+            return "The new schedule overlaps with another session."
+        }
+    }
+}
+
+struct RescheduleStudySessionUseCase {
+    func execute(
+        plan: AssignmentStudyPlan,
+        sessionID: UUID,
+        startsAt: Date,
+        now: Date = Date()
+    ) throws -> AssignmentStudyPlan {
+        guard plan.isApproved else {
+            throw StudySessionRescheduledError.planNotApproved
+        }
+        
+        guard let index = plan.sessions.firstIndex(where: {$0.id == sessionID}) else {
+            throw StudySessionRescheduledError.sessionNotFound
+        }
+        
+        let session = plan.sessions[index]
+        
+        guard !session.isCompleted else {
+            throw StudySessionRescheduledError.alreadyCompleted
+        }
+        
+        guard let minutes = session.durationMinutes, minutes > 0 else {
+            throw StudySessionRescheduledError.invalidSchedule(session.taskTitle)
+        }
+        
+        guard startsAt >= now else {
+            throw StudySessionRescheduledError.startTimeInPast
+        }
+        
+        let end = startsAt.addingTimeInterval(Double(minutes * 60))
+        
+        guard end <= plan.assignment.dueDate else {
+            throw StudySessionRescheduledError.finishesAfterDeadline
+        }
+        
+        for other in plan.sessions
+        where other.id != session.id && !other.isCompleted {
+            guard let otherStart = other.startsAt, let otherMinutes = other.durationMinutes,
+                  otherMinutes > 0 else {
+                throw StudySessionRescheduledError.invalidSchedule(other.taskTitle)
+            }
+            
+            let otherEnd = otherStart.addingTimeInterval(Double(otherMinutes * 60))
+            
+            if startsAt < otherEnd && otherStart < end {
+                throw StudySessionRescheduledError.overlapAnotherSession
+            }
+        }
+        
+        var updatedPlan = plan
+        updatedPlan.sessions[index].startsAt = startsAt
+        return updatedPlan
+    }
+}

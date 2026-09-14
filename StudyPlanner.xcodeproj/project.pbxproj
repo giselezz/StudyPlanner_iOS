@@ -49,15 +49,6 @@
 			);
 			target = 5E9C3896304D965C0024E133 /* StudyPlanner */;
 		};
-		5E9C38E5304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlannerTests" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Assets.xcassets,
-				ContentView.swift,
-				StudyPlannerApp.swift,
-			);
-			target = 5E9C38A3304D965D0024E133 /* StudyPlannerTests */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,7 +66,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				5E9C38E4304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlanner" target */,
-				5E9C38E5304D992C0024E133 /* Exceptions for "StudyPlanner" folder in "StudyPlannerTests" target */,
 			);
 			path = StudyPlanner;
 			sourceTree = "<group>";
@@ -164,7 +154,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				5E9C38A7304D965D0024E133 /* StudyPlannerTests */,
-				5E9C38E0304D992B0024E133 /* StudyPlanner */,
 			);
 			name = StudyPlannerTests;
 			packageProductDependencies = (
